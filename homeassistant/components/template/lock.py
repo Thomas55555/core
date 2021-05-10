@@ -1,7 +1,7 @@
 """Support for locks which integrates with other components."""
 import voluptuous as vol
 
-from homeassistant.components.lock import PLATFORM_SCHEMA, LockEntity
+from homeassistant.components.lock import PLATFORM_SCHEMA, SUPPORT_OPEN, LockEntity
 from homeassistant.const import (
     CONF_NAME,
     CONF_OPTIMISTIC,
@@ -20,6 +20,7 @@ from .template_entity import TemplateEntity
 
 CONF_LOCK = "lock"
 CONF_UNLOCK = "unlock"
+CONF_OPEN = "open"
 
 DEFAULT_NAME = "Template Lock"
 DEFAULT_OPTIMISTIC = False
@@ -33,6 +34,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_AVAILABILITY_TEMPLATE): cv.template,
         vol.Optional(CONF_OPTIMISTIC, default=DEFAULT_OPTIMISTIC): cv.boolean,
         vol.Optional(CONF_UNIQUE_ID): cv.string,
+        vol.Optional(CONF_OPEN): cv.SCRIPT_SCHEMA,
     }
 )
 
@@ -51,6 +53,7 @@ async def _async_create_entities(hass, config):
             availability_template,
             config.get(CONF_LOCK),
             config.get(CONF_UNLOCK),
+            config.get(CONF_OPEN),
             config.get(CONF_OPTIMISTIC),
             config.get(CONF_UNIQUE_ID),
         )
@@ -73,6 +76,7 @@ class TemplateLock(TemplateEntity, LockEntity):
         availability_template,
         command_lock,
         command_unlock,
+        command_open,
         optimistic,
         unique_id,
     ):
@@ -84,6 +88,7 @@ class TemplateLock(TemplateEntity, LockEntity):
         domain = __name__.split(".")[-2]
         self._command_lock = Script(hass, command_lock, name, domain)
         self._command_unlock = Script(hass, command_unlock, name, domain)
+        self._command_open = Script(hass, command_open, name, domain)
         self._optimistic = optimistic
         self._unique_id = unique_id
 
@@ -106,6 +111,11 @@ class TemplateLock(TemplateEntity, LockEntity):
     def is_locked(self):
         """Return true if lock is locked."""
         return self._state
+
+    @property
+    def supported_features(self):
+        """Flag supported features."""
+        return SUPPORT_OPEN if CONF_OPEN in self._config else 0
 
     @callback
     def _update_state(self, result):
@@ -144,3 +154,10 @@ class TemplateLock(TemplateEntity, LockEntity):
             self._state = False
             self.async_write_ha_state()
         await self._command_unlock.async_run(context=self._context)
+
+    async def async_open(self, **kwargs):
+        """Open the device."""
+        if self._optimistic:
+            self._state = False
+            self.async_write_ha_state()
+        await self._command_open.async_run(context=self._context)

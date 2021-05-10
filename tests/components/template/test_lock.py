@@ -325,6 +325,47 @@ async def test_unlock_action(hass, calls):
     assert len(calls) == 1
 
 
+async def test_open_action(hass, calls):
+    """Test unlock action."""
+    assert await setup.async_setup_component(
+        hass,
+        lock.DOMAIN,
+        {
+            "lock": {
+                "platform": "template",
+                "value_template": "{{ states.switch.test_state.state }}",
+                "lock": {
+                    "service": "switch.turn_on",
+                    "entity_id": "switch.test_state",
+                },
+                "unlock": {
+                    "service": "switch.turn_off",
+                    "entity_id": "switch.test_state",
+                },
+                "open": {"service": "test.automation"},
+            }
+        },
+    )
+
+    await hass.async_block_till_done()
+    await hass.async_start()
+    await hass.async_block_till_done()
+
+    hass.states.async_set("switch.test_state", STATE_ON)
+    await hass.async_block_till_done()
+
+    state = hass.states.get("lock.template_lock")
+    assert state.state == lock.STATE_LOCKED
+    assert state.state == lock.STATE_UNLOCKED
+
+    await hass.services.async_call(
+        lock.DOMAIN, lock.SERVICE_OPEN, {ATTR_ENTITY_ID: "lock.template_lock"}
+    )
+    await hass.async_block_till_done()
+
+    assert len(calls) == 1
+
+
 async def test_available_template_with_entities(hass):
     """Test availability templates with values from other entities."""
 
