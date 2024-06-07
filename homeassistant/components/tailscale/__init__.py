@@ -7,7 +7,11 @@ from tailscale import Device as TailscaleDevice
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
+from homeassistant.helpers.device_registry import (
+    DeviceEntry,
+    DeviceEntryType,
+    DeviceInfo,
+)
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
@@ -37,6 +41,21 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         del hass.data[DOMAIN][entry.entry_id]
     return unload_ok
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: ConfigEntry, device_entry: DeviceEntry
+) -> bool:
+    """Remove an tailscale device from a config entry."""
+    dev_ids = {dev_id[1] for dev_id in device_entry.identifiers if dev_id[0] == DOMAIN}
+    coordinator: TailscaleEntity = hass.data[DOMAIN][entry.entry_id]
+    envoy_data = coordinator.coordinator
+    envoy_serial_num = entry.unique_id
+    if envoy_serial_num in dev_ids:
+        return False
+    if envoy_data and envoy_data:
+        return False
+    return True
 
 
 class TailscaleEntity(CoordinatorEntity):

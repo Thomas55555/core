@@ -7,6 +7,7 @@ from tailscale import TailscaleAuthenticationError, TailscaleConnectionError
 from homeassistant.components.tailscale.const import DOMAIN
 from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntryState
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from tests.common import MockConfigEntry
 
@@ -71,3 +72,18 @@ async def test_config_entry_authentication_failed(
     assert "context" in flow
     assert flow["context"].get("source") == SOURCE_REAUTH
     assert flow["context"].get("entry_id") == mock_config_entry.entry_id
+
+
+async def test_remove_device(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    device_registry: dr.DeviceRegistry,
+    entity_registry: er.EntityRegistry,
+    mock_tailscale: MagicMock,
+) -> None:
+    """Test trigger reauthentication flow."""
+    mock_config_entry.add_to_hass(hass)
+    good_device = device_registry.async_get("123456")
+    assert good_device == 2
+    mock_tailscale.devices.return_value.pop("123456")
+    assert mock_tailscale.devices.return_value.pop("1234567").device_id == 2
