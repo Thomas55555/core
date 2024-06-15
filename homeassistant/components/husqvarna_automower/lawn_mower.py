@@ -92,6 +92,18 @@ async def async_setup_entry(
         },
         "async_override_schedule",
     )
+    platform.async_register_entity_service(
+        "override_workarea",
+        {
+            vol.Required("work_area"): vol.All(str),
+            vol.Required("duration"): vol.All(
+                cv.time_period,
+                cv.positive_timedelta,
+                vol.Range(min=timedelta(minutes=1), max=timedelta(days=42)),
+            ),
+        },
+        "async_override_workarea",
+    )
 
 
 class AutomowerLawnMowerEntity(AutomowerControlEntity, LawnMowerEntity):
