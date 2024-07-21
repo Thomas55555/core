@@ -1,5 +1,12 @@
 {
   "title": "Lawn mower",
+  "device_automation": {
+    "action_type": {
+      "mow": "Start mowing {entity_name}",
+      "dock": "Dock {entity_name}",
+      "pause": "Pause {entity_name}"
+    }
+  },
   "entity_component": {
     "_": {
       "name": "[%key:component::lawn_mower::title%]",
