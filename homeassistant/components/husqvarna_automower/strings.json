@@ -210,6 +210,13 @@
           "zone_generator_problem": "Zone generator problem"
         }
       },
+      "inactive_reason": {
+        "name": "Inactive reason",
+        "state": {
+          "none": "No restrictions",
+          "planning": "Planning"
+        }
+      },
       "my_lawn_last_time_completed": {
         "name": "My lawn last time completed"
       },

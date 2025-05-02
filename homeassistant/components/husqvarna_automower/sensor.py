@@ -8,6 +8,7 @@ from operator import attrgetter
 from typing import TYPE_CHECKING, Any
 
 from aioautomower.model import (
+    InactiveReasons,
     MowerAttributes,
     MowerModes,
     MowerStates,
@@ -192,6 +193,14 @@ RESTRICTED_REASONS: list = [
     RestrictedReasons.SENSOR,
     RestrictedReasons.WEEK_SCHEDULE,
 ]
+
+INACTIVE_REASONS: list = [
+    InactiveReasons.NONE,
+    InactiveReasons.PLANNING,
+    InactiveReasons.SEARCHING_FOR_SATELLITES,
+    "none",
+]
+
 
 STATE_NO_WORK_AREA_ACTIVE = "no_work_area_active"
 
@@ -404,6 +413,15 @@ MOWER_SENSOR_TYPES: tuple[AutomowerSensorEntityDescription, ...] = (
         value_fn=attrgetter("planner.restricted_reason"),
     ),
     AutomowerSensorEntityDescription(
+        key="inactive_reason",
+        translation_key="inactive_reason",
+        device_class=SensorDeviceClass.ENUM,
+        entity_registry_enabled_default=False,
+        exists_fn=lambda data: data.mower.inactive_reason is not None,
+        option_fn=lambda data: INACTIVE_REASONS,
+        value_fn=attrgetter("mower.inactive_reason"),
+    ),
+    AutomowerSensorEntityDescription(
         key="work_area",
         translation_key="work_area",
         device_class=SensorDeviceClass.ENUM,
@@ -558,6 +576,7 @@ class WorkAreaSensorEntity(WorkAreaAvailableEntity, SensorEntity):
     @property
     def native_value(self) -> StateType | datetime:
         """Return the state of the sensor."""
+
         return self.entity_description.value_fn(self.work_area_attributes)
 
     @property
