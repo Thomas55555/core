@@ -581,7 +581,10 @@
         },
         "override_mode": {
           "description": "With which action the schedule should be overridden.",
-          "name": "Override mode"
+          "name": "Override mode",
+        "external_reason": {
+          "description": "For parking the mower with a duration. The external reason is only available if the mower support work areas. Else the external reason will be ignored. The exernal reason will be automatically removed after 25 hours.",
+          "name": "External reason"
         }
       },
       "name": "Override schedule"
