@@ -16,6 +16,7 @@ from homeassistant.config_entries import (
     ConfigFlow,
     ConfigFlowResult,
     ConfigSubentryFlow,
+    OptionsFlowWithReload,
     SubentryFlowResult,
 )
 from homeassistant.const import (
@@ -37,6 +38,7 @@ _LOGGER = logging.getLogger(__name__)
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_API_KEY): str,
+        vol.Required("forecaST"): str,
         vol.Optional(SECTION_API_KEY_OPTIONS): section(
             vol.Schema({vol.Optional(CONF_REFERRER): str}), {"collapsed": True}
         ),
@@ -161,6 +163,14 @@ class GoogleAirQualityConfigFlow(ConfigFlow, domain=DOMAIN):
         """Return subentries supported by this integration."""
         return {"location": LocationSubentryFlowHandler}
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: ConfigEntry,
+    ) -> OptionsFlowWithReload:
+        """Create the options flow."""
+        return MyOptionsFlow()
+
 
 class LocationSubentryFlowHandler(ConfigSubentryFlow):
     """Handle a subentry flow for location."""
@@ -196,3 +206,28 @@ class LocationSubentryFlowHandler(ConfigSubentryFlow):
         )
 
     async_step_user = async_step_location
+
+
+OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Required("show_things"): bool,
+    }
+)
+
+
+class MyOptionsFlow(OptionsFlowWithReload):
+    """Handle Google Air Quality options flow."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
+            ),
+        )
