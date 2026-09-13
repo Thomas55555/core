@@ -124,6 +124,7 @@
             "type": "SYSTEMATIC",
             "cuttingHeight": 50,
             "enabled": false,
+            "orientation": 600,
             "progress": 20,
             "lastTimeCompleted": 1723439269,
             "lastTimeAbandoned": 0,

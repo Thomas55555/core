@@ -5,11 +5,11 @@ from dataclasses import dataclass
 import logging
 from typing import TYPE_CHECKING, Any, override
 
-from aioautomower.model import MowerAttributes, WorkArea
+from aioautomower.model import MowerAttributes, WorkArea, WorkAreaType
 from aioautomower.session import AutomowerSession
 
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
-from homeassistant.const import PERCENTAGE, EntityCategory
+from homeassistant.const import DEGREE, PERCENTAGE, EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -85,6 +85,7 @@ MOWER_NUMBER_TYPES: tuple[AutomowerNumberEntityDescription, ...] = (
 class WorkAreaNumberEntityDescription(NumberEntityDescription):
     """Describes Automower work area number entity."""
 
+    exists_fn: Callable[[WorkArea], bool] = lambda _: True
     value_fn: Callable[[WorkArea], int]
     translation_key_fn: Callable[[int, str], str]
     set_value_fn: Callable[
@@ -99,6 +100,16 @@ WORK_AREA_NUMBER_TYPES: tuple[WorkAreaNumberEntityDescription, ...] = (
         entity_category=EntityCategory.CONFIG,
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda data: data.cutting_height,
+        set_value_fn=async_set_work_area_cutting_height,
+    ),
+    WorkAreaNumberEntityDescription(
+        key="orientation",
+        translation_key_fn=_work_area_translation_key,
+        entity_category=EntityCategory.CONFIG,
+        native_unit_of_measurement=DEGREE,
+        native_max_value=1800,
+        exists_fn=lambda data: data.type == WorkAreaType.SYSTEMATIC,
+        value_fn=lambda data: data.orientation * 10,
         set_value_fn=async_set_work_area_cutting_height,
     ),
 )
@@ -121,7 +132,8 @@ async def async_setup_entry(
                         mower_id, coordinator, description, work_area_id
                     )
                     for description in WORK_AREA_NUMBER_TYPES
-                    for work_area_id in _work_areas
+                    for work_area_id, work_area in _work_areas.items()
+                    if description.exists_fn(work_area)
                 )
         entities.extend(
             AutomowerNumberEntity(mower_id, coordinator, description)

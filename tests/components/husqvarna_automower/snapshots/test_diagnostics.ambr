@@ -144,7 +144,7 @@
         'last_time_abandoned': None,
         'last_time_completed': '2024-08-12T05:07:49+02:00',
         'name': 'my_lawn',
-        'orientation': None,
+        'orientation': 600,
         'orientation_shift': None,
         'progress': 20,
         'type': 'systematic',

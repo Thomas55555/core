@@ -241,8 +241,14 @@
       "my_lawn_cutting_height_work_area": {
         "name": "My lawn cutting height"
       },
+      "my_lawn_orientation": {
+        "name": "My lawn orientation"
+      },
       "work_area_cutting_height_work_area": {
         "name": "{work_area} cutting height"
+      },
+      "work_area_orientation": {
+        "name": "{work_area} orientation"
       }
     },
     "select": {
