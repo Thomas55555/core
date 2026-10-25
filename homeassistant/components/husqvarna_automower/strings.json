@@ -556,6 +556,15 @@
     "command_send_failed": {
       "message": "Failed to send command: {exception}"
     },
+    "external_reason": {
+      "message": "The maximum duration in combination with an external reason are 25h."
+    },
+    "external_reason_mow": {
+      "message": "External reason is only allowed with override mode `park`"
+    },
+    "oauth2_implementation_unavailable": {
+      "message": "[%key:common::exceptions::oauth2_implementation_unavailable::message%]"
+    },
     "work_area_not_existing": {
       "message": "The selected work area does not exist."
     },
@@ -579,12 +588,13 @@
           "description": "Minimum: 1 minute, maximum: 42 days.",
           "name": "Duration"
         },
-        "override_mode": {
-          "description": "With which action the schedule should be overridden.",
-          "name": "Override mode",
         "external_reason": {
           "description": "For parking the mower with a duration. The external reason is only available if the mower support work areas. Else the external reason will be ignored. The exernal reason will be automatically removed after 25 hours.",
           "name": "External reason"
+        },
+        "override_mode": {
+          "description": "With which action the schedule should be overridden.",
+          "name": "Override mode"
         }
       },
       "name": "Override schedule"
