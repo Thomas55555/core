@@ -29,6 +29,10 @@ def async_setup_services(hass: HomeAssistant) -> None:
                 cv.positive_timedelta,
                 probatio.Range(min=timedelta(minutes=1), max=timedelta(days=42)),
             ),
+            probatio.Optional("external_reason"): probatio.All(
+                probatio.Coerce(int),
+                probatio.Range(min=200_000, max=299_999),
+            ),
         },
         func="async_override_schedule",
     )
